@@ -1,6 +1,6 @@
 package com.grup6.telco_ticket_analyzer.repository;
 
-import com.grup6.telco_ticket_analyzer.entity.ServiceType;
+import com.grup6.telco_ticket_analyzer.model.ServiceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.grup6.telco_ticket_analyzer.repository;
 
-import com.grup6.telco_ticket_analyzer.entity.Region;
+import com.grup6.telco_ticket_analyzer.model.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

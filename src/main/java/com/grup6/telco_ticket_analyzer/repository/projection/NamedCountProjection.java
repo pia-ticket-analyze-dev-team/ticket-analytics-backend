@@ -1,8 +1,8 @@
 package com.grup6.telco_ticket_analyzer.repository.projection;
 
-public interface TicketStatusCountProjection {
+public interface NamedCountProjection {
 
-    String getStatus();
+    String getName();
 
     Long getTicketCount();
 }

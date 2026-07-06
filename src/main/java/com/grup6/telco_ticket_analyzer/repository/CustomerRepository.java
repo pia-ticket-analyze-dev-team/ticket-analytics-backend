@@ -1,6 +1,6 @@
 package com.grup6.telco_ticket_analyzer.repository;
 
-import com.grup6.telco_ticket_analyzer.entity.Customer;
+import com.grup6.telco_ticket_analyzer.model.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
 package com.grup6.telco_ticket_analyzer.repository;
 
-import com.grup6.telco_ticket_analyzer.entity.Ticket;
+import com.grup6.telco_ticket_analyzer.model.Ticket;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,7 +24,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     Page<Ticket> findByAgentId(UUID agentId, Pageable pageable);
 
-    Page<Ticket> findByIsSlaBreached(Boolean isSlaBreached, Pageable pageable);
+    Page<Ticket> findBySlaBreached(Boolean slaBreached, Pageable pageable);
 
     Page<Ticket> findByCreatedAtBetween(
             LocalDateTime startDate,

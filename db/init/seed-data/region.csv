@@ -1,22 +1,22 @@
 id,city_name,geographical_region
-b98964fd-1338-438d-9698-1163ed8a6ce9,Istanbul,Marmara
-8d919a24-b484-43fa-8747-b9fcf363f985,Kocaeli,Marmara
-a498b858-9e1c-4c69-bccd-aa2bc135ffbf,Bursa,Marmara
-a04fb0d8-6d57-4856-a99e-cb45b2761f97,Tekirdağ,Marmara
-351b9ca9-3fd1-4432-bd53-3a5e29e3da66,Izmir,Ege
-bcb92997-b3a1-4386-a4db-e45ee4fe9af4,Aydın,Ege
-622462f6-da55-4b72-adf3-d98efbc1d3fb,Manisa,Ege
-92e377a0-f142-4deb-b928-e91188581547,Muğla,Ege
-3009299b-906f-4801-91fb-af9d6defdbb9,Antalya,Akdeniz
-c9c34f54-fdc8-4ac5-a4a2-61877dd9b2ff,Adana,Akdeniz
-c888c27e-6a35-41d9-8351-56fbf7af14c4,Mersin,Akdeniz
-8c7a9a35-75af-4a10-adb8-f7464553879f,Ankara,İç Anadolu
-f4cc30fe-e5b3-450f-9ebd-61195e0c92b6,Konya,İç Anadolu
-2cc899f5-d56c-4520-9b1d-a392ab865f7b,Eskişehir,İç Anadolu
-d4312dc2-4d49-4374-93f8-23810768fb19,Samsun,Karadeniz
-e231fc06-cdcd-4eb3-a101-007ab18d9596,Trabzon,Karadeniz
-c99a90c9-4396-410b-bc63-98fbd03e4fe5,Erzurum,Doğu Anadolu
-66f789e5-c0b5-4e4e-a236-71f4277610cc,Van,Doğu Anadolu
-3b64be38-26e0-4fa8-8e06-508b21dcdadf,Gaziantep,Güneydoğu Anadolu
-436c3993-971c-4acf-a14b-accd91def5ef,Diyarbakır,Güneydoğu Anadolu
-7be64521-be8b-4baa-bffe-28a443b9e249,Şanlıurfa,Güneydoğu Anadolu
+d038794f-d00e-4d16-8fab-9670fdf18733,Istanbul,Marmara
+e5d16d18-e2f3-45d3-8519-24a0375805ab,Kocaeli,Marmara
+fda9a3f2-ff05-4cde-bb3a-15ffe1c63724,Bursa,Marmara
+ac35e062-0e43-4941-9fb0-cf79cebd4778,Tekirdağ,Marmara
+2fc24f91-115f-4ab7-88f5-a5314150a569,Izmir,Ege
+12dcb821-d21b-443a-8794-9d8bf2862801,Aydın,Ege
+ea064135-5a6b-4bb9-aee9-94411c8bafcc,Manisa,Ege
+5724f0d6-6044-4c32-8bd6-b7a848f369e5,Muğla,Ege
+2fde4c82-5f45-48d0-b6a3-587b72467ae1,Antalya,Akdeniz
+ddf9abe9-70d4-4005-af69-4ac342bfb999,Adana,Akdeniz
+9514bb72-d80b-4252-995d-a665aa91a0c6,Mersin,Akdeniz
+e83859a2-dfbb-4aaf-a9da-4d1427e2f7fb,Ankara,İç Anadolu
+cf7b6872-dab7-46c2-af0f-1ac32bfa200a,Konya,İç Anadolu
+b1df3fab-5915-4175-8403-f12ba6d60c17,Eskişehir,İç Anadolu
+b3482fb6-53fa-411d-9d01-9d69d5d8963e,Samsun,Karadeniz
+748b0799-e5c5-4f33-b095-7405e31c1ee1,Trabzon,Karadeniz
+23312343-81c6-4b37-af3a-520774dc7d3d,Erzurum,Doğu Anadolu
+245614f3-a0ea-4aa1-ad7f-7c7823a2b656,Van,Doğu Anadolu
+07b888df-46a4-4f12-9a12-82cb403d881c,Gaziantep,Güneydoğu Anadolu
+d4148ade-a1c5-45e3-a0a3-7f102d65901b,Diyarbakır,Güneydoğu Anadolu
+c1967a54-00ea-47bd-af6d-d82bc5909243,Şanlıurfa,Güneydoğu Anadolu

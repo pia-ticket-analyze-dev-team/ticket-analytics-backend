@@ -12,4 +12,6 @@ public interface AgentRepository extends JpaRepository<Agent, UUID> {
     List<Agent> findByDepartment(Department department);
 
     List<Agent> findByDepartmentId(UUID departmentId);
+
+    
 }

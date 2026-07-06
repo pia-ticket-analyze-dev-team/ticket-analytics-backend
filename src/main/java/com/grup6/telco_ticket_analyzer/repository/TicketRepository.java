@@ -26,9 +26,29 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     Page<Ticket> findBySlaBreached(Boolean slaBreached, Pageable pageable);
 
-    Page<Ticket> findByCreatedAtBetween(
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            Pageable pageable
-    );
+    //ticket count on last 30 days and total count
+    Long countByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);   
+    
+   //region based ticket count
+    Long countByRegionId(UUID regionId);
+
+    //topic based ticket count
+    Long countByTopicId(UUID topicId);
+
+    //department based ticket count
+    Long countByCurrentDepartmentId(UUID currentDepartmentId);
+
+    //agent based ticket count
+    Long countByAgentId(UUID agentId);   
+    
+    //count all tickets  
+    Long countAll();
+
+    //count by status
+    Long countByStatus(String status);  
+
+    //issue topic based ticket count
+    Long countByTopicIdAndStatus(UUID topicId, String status);
+
+
 }

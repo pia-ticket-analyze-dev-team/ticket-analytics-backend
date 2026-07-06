@@ -22,4 +22,14 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     );
 
     Page<Customer> findBySegment(String segment, Pageable pageable);
+
+    Page<Customer> findByRegionId(UUID regionId, Pageable pageable);    
+
+    Page<Customer> findByCreatedAtBetween(
+            java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate,
+            Pageable pageable
+    );
+
+    Page
 }

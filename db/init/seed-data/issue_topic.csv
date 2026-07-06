@@ -1,0 +1,19 @@
+id,topic_name,sla_target_hours
+0de50d67-e309-45ac-863a-188ca0598c81,SIM Replacement,24
+f3c8c0a0-2759-4e7c-ac2a-c7539adf8727,SIM Activation,24
+53f5fee3-1ed6-42e8-873b-4fb767902ab7,Roaming Issue,48
+c7e0fd38-5908-4296-90ab-1009add77199,SMS Issue,24
+d3a13b16-489e-4009-963d-dbd62c5b7615,Coverage Issue,48
+d171d73b-6247-4b7f-936f-e6b5f01b1bdf,Call Issue,24
+6d685ce7-d032-4a76-bfff-7855facb863d,Mobile App Issue,72
+c1129aba-2a2e-4680-8dff-70262736b274,Slow Internet,48
+b17b8322-6f21-47ab-bcd0-a8ded4cfd096,Connection Issue,24
+49a3151c-50d3-401a-80d4-f0f0f5c51d3f,Device Support,72
+d95f4fb4-84eb-42b7-b39c-5f2593206c3d,Network Outage,4
+914085ed-25c6-47c4-aa6c-77a2794288d4,Billing Issue,72
+0b92e4ac-92fb-493d-87ba-8fabe3aad765,Payment Issue,72
+40927d12-82ae-4c6a-9bcd-bd10d707f43c,Account Access,24
+c1a139f4-91a1-4c07-ab9d-5aeb1d665774,Login Access,24
+c42a7fe7-1656-44d1-8dd2-629c69949d67,Contract & Subscription,72
+1186ba58-504d-4b6e-a01d-fe92b71c96a2,Other,72
+2ac9652c-ca18-4388-805b-df0933f7b820,System Alarm / Hardware Warning,12

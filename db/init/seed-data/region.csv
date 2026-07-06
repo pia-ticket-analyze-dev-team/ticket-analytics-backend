@@ -1,0 +1,22 @@
+id,city_name,geographical_region
+b98964fd-1338-438d-9698-1163ed8a6ce9,Istanbul,Marmara
+8d919a24-b484-43fa-8747-b9fcf363f985,Kocaeli,Marmara
+a498b858-9e1c-4c69-bccd-aa2bc135ffbf,Bursa,Marmara
+a04fb0d8-6d57-4856-a99e-cb45b2761f97,Tekirdağ,Marmara
+351b9ca9-3fd1-4432-bd53-3a5e29e3da66,Izmir,Ege
+bcb92997-b3a1-4386-a4db-e45ee4fe9af4,Aydın,Ege
+622462f6-da55-4b72-adf3-d98efbc1d3fb,Manisa,Ege
+92e377a0-f142-4deb-b928-e91188581547,Muğla,Ege
+3009299b-906f-4801-91fb-af9d6defdbb9,Antalya,Akdeniz
+c9c34f54-fdc8-4ac5-a4a2-61877dd9b2ff,Adana,Akdeniz
+c888c27e-6a35-41d9-8351-56fbf7af14c4,Mersin,Akdeniz
+8c7a9a35-75af-4a10-adb8-f7464553879f,Ankara,İç Anadolu
+f4cc30fe-e5b3-450f-9ebd-61195e0c92b6,Konya,İç Anadolu
+2cc899f5-d56c-4520-9b1d-a392ab865f7b,Eskişehir,İç Anadolu
+d4312dc2-4d49-4374-93f8-23810768fb19,Samsun,Karadeniz
+e231fc06-cdcd-4eb3-a101-007ab18d9596,Trabzon,Karadeniz
+c99a90c9-4396-410b-bc63-98fbd03e4fe5,Erzurum,Doğu Anadolu
+66f789e5-c0b5-4e4e-a236-71f4277610cc,Van,Doğu Anadolu
+3b64be38-26e0-4fa8-8e06-508b21dcdadf,Gaziantep,Güneydoğu Anadolu
+436c3993-971c-4acf-a14b-accd91def5ef,Diyarbakır,Güneydoğu Anadolu
+7be64521-be8b-4baa-bffe-28a443b9e249,Şanlıurfa,Güneydoğu Anadolu

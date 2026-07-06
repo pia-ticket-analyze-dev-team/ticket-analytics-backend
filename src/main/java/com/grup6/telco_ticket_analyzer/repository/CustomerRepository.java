@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,13 +24,13 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Page<Customer> findBySegment(String segment, Pageable pageable);
 
-    Page<Customer> findByRegionId(UUID regionId, Pageable pageable);    
-
     Page<Customer> findByCreatedAtBetween(
-            java.time.LocalDateTime startDate,
-            java.time.LocalDateTime endDate,
+            LocalDate startDate,
+            LocalDate endDate,
             Pageable pageable
     );
 
-    Page
+    //total customer count as of a cutoff (for month-over-month KPI comparisons)
+    long countByCreatedAtBefore(LocalDate cutoff);
+
 }

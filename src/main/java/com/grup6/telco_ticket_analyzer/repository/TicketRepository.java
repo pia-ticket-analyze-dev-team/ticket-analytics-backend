@@ -1,11 +1,14 @@
 package com.grup6.telco_ticket_analyzer.repository;
 
 import com.grup6.telco_ticket_analyzer.model.Ticket;
+import com.grup6.telco_ticket_analyzer.repository.projection.ResolutionTimeProjection;
+import com.grup6.telco_ticket_analyzer.repository.projection.SatisfactionScoreProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
@@ -39,10 +42,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Long countByCurrentDepartmentId(UUID currentDepartmentId);
 
     //agent based ticket count
-    Long countByAgentId(UUID agentId);   
-    
-    //count all tickets  
-    Long countAll();
+    Long countByAgentId(UUID agentId);
 
     //count by status
     Long countByStatus(String status);  
@@ -50,5 +50,20 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     //issue topic based ticket count
     Long countByTopicIdAndStatus(UUID topicId, String status);
 
+    //total ticket count as of a cutoff (for month-over-month KPI comparisons)
+    long countByCreatedAtBefore(LocalDateTime cutoff);
+
+    //open ticket count as of a cutoff (for month-over-month KPI comparisons)
+    long countByStatusAndCreatedAtBefore(String status, LocalDateTime cutoff);
+
+    //resolution times for averaging in the service layer
+    List<ResolutionTimeProjection> findByResolutionTimeHoursIsNotNull();
+
+    List<ResolutionTimeProjection> findByResolutionTimeHoursIsNotNullAndResolvedAtBefore(LocalDateTime cutoff);
+
+    //satisfaction scores for averaging in the service layer
+    List<SatisfactionScoreProjection> findByCustomerSatisfactionScoreIsNotNull();
+
+    List<SatisfactionScoreProjection> findByCustomerSatisfactionScoreIsNotNullAndResolvedAtBefore(LocalDateTime cutoff);
 
 }

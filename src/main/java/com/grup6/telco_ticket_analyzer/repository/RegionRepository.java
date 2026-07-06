@@ -12,4 +12,5 @@ public interface RegionRepository extends JpaRepository<Region, UUID> {
     Optional<Region> findByCityName(String cityName);
 
     List<Region> findByGeographicalRegion(String geographicalRegion);
+
 }

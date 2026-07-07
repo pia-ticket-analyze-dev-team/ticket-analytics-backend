@@ -109,6 +109,30 @@ public class TicketService implements TicketServiceInterface {
         return toResponseDto(findTicketOrThrow(id));
     }
 
+    @Override
+    public PagedResponseDto<TicketResponseDto> getTicketsByCustomerId(UUID customerId, int page, int size) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                clampSize(size),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Ticket> ticketPage = ticketRepository.findByCustomerId(customerId, pageable);
+
+        List<TicketResponseDto> content = ticketPage.getContent()
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+
+        return new PagedResponseDto<>(
+                content,
+                ticketPage.getNumber(),
+                ticketPage.getSize(),
+                ticketPage.getTotalElements(),
+                ticketPage.getTotalPages()
+        );
+    }
+
     private int clampSize(int size) {
         if (size < 1) {
             return DEFAULT_PAGE_SIZE;

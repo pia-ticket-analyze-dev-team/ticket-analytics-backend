@@ -17,4 +17,12 @@ public interface CustomerServiceInterface {
     CustomerResponseDto updateCustomer(UUID id, CustomerRequestDto requestDto);
 
     void deleteCustomer(UUID id);
+
+    long getTotalTicketCount(UUID customerId);
+
+    long getOpenTicketCount(UUID customerId);
+
+    long getSlaBreachCount(UUID customerId);
+
+    double getAverageSatisfactionScore(UUID customerId);
 }

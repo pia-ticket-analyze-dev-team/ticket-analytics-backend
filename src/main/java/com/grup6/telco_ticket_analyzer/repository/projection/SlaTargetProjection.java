@@ -1,0 +1,6 @@
+package com.grup6.telco_ticket_analyzer.repository.projection;
+
+public interface SlaTargetProjection {
+
+    boolean isSlaBreached();
+}

@@ -7,6 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+//analytics icin ekledigim importlar
+import com.grup6.telco_ticket_analyzer.repository.projection.AgentPerformanceProjection;
+import com.grup6.telco_ticket_analyzer.repository.projection.CustomerChurnProjection;
+import com.grup6.telco_ticket_analyzer.repository.projection.ServiceTypeTrendProjection;
+import com.grup6.telco_ticket_analyzer.repository.projection.SlaTargetProjection;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -65,5 +71,26 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<SatisfactionScoreProjection> findByCustomerSatisfactionScoreIsNotNull();
 
     List<SatisfactionScoreProjection> findByCustomerSatisfactionScoreIsNotNullAndResolvedAtBefore(LocalDateTime cutoff);
+
+    //analytics queries 
+    List<CustomerChurnProjection> findByCustomerIsNotNullAndCreatedAtBetween(
+        LocalDateTime startDate,
+        LocalDateTime endDate
+    );
+
+    List<AgentPerformanceProjection> findByAgentIsNotNullAndResolvedAtBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    List<SlaTargetProjection> findByCreatedAtBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    List<ServiceTypeTrendProjection> findByServiceTypeIsNotNullAndCreatedAtBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+);
 
 }

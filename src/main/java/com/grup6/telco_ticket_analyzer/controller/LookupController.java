@@ -45,4 +45,15 @@ public class LookupController {
     public List<LookupDto> getAgents(@RequestParam(required = false) UUID departmentId) {
         return lookupService.getAgents(departmentId);
     }
+
+     @GetMapping("/api/customer-segments")
+    public List<LookupDto> getCustomerSegments() {
+        return lookupService.getCustomerSegments();
+    }
+
+    @GetMapping("/api/risk-levels")
+    public List<LookupDto> getRiskLevels() {
+        return lookupService.getRiskLevels();
+    }
 }
+

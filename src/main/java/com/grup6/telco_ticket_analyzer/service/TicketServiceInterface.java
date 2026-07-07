@@ -5,7 +5,6 @@ import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public interface TicketServiceInterface {

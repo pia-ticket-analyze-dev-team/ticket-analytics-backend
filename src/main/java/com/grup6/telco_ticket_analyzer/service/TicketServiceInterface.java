@@ -4,23 +4,11 @@ import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public interface TicketServiceInterface {
 
-    PagedResponseDto<TicketResponseDto> getAllTickets(
-            int page,
-            String status,
-            String priority,
-            UUID topicId,
-            UUID departmentId,
-            UUID regionId,
-            Boolean slaBreached,
-            UUID agentId,
-            LocalDateTime startDate,
-            LocalDateTime endDate
-    );
+    PagedResponseDto<TicketResponseDto> getAllTickets(int page, int size);
 
     TicketResponseDto getTicketById(UUID id);
 

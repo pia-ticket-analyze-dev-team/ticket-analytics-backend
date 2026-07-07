@@ -33,4 +33,9 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     //total customer count as of a cutoff (for month-over-month KPI comparisons)
     long countByCreatedAtBefore(LocalDate cutoff);
 
+    Optional<Customer> findByFirstNameIgnoreCaseAndLastNameIgnoreCase(
+        String firstName,
+        String lastName
+);
+
 }

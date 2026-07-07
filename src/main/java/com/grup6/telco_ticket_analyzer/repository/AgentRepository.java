@@ -5,6 +5,7 @@ import com.grup6.telco_ticket_analyzer.model.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AgentRepository extends JpaRepository<Agent, UUID> {
@@ -13,5 +14,5 @@ public interface AgentRepository extends JpaRepository<Agent, UUID> {
 
     List<Agent> findByDepartmentId(UUID departmentId);
 
-    
+    Optional<Agent> findByFullNameIgnoreCase(String fullName);
 }

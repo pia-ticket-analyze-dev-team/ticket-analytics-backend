@@ -5,8 +5,7 @@ import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 import com.grup6.telco_ticket_analyzer.exception.TicketNotFoundException;
 import com.grup6.telco_ticket_analyzer.model.*;
-import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
-import jakarta.persistence.EntityManager;
+import com.grup6.telco_ticket_analyzer.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +25,13 @@ public class TicketService implements TicketServiceInterface {
     private static final int MAX_PAGE_SIZE = 50;
 
     private final TicketRepository ticketRepository;
-    private final EntityManager entityManager;
+    private final CustomerRepository customerRepository;
+    private final IssueTopicRepository issueTopicRepository;
+    private final DepartmentRepository departmentRepository;
+    private final AgentRepository agentRepository;
+    private final RegionRepository regionRepository;
+    private final ServiceTypeRepository serviceTypeRepository;
+    private final InfrastructureTypeRepository infrastructureTypeRepository;
 
     @Override
     public PagedResponseDto<TicketResponseDto> getAllTickets(int page, int size) {
@@ -59,12 +64,28 @@ public class TicketService implements TicketServiceInterface {
 
     @Override
     public TicketResponseDto createTicket(TicketRequestDto requestDto) {
-        Ticket ticket = new Ticket();
-        applyRequestDto(ticket, requestDto);
+        Department department = findDepartmentByName(requestDto.departmentName());
 
-        if (ticket.getCreatedAt() == null) {
-            ticket.setCreatedAt(LocalDateTime.now());
-        }
+        Ticket ticket = new Ticket();
+        ticket.setTicketNumber(generateTicketNumber());
+        ticket.setCustomer(findCustomerByFullName(requestDto.customerName()));
+        ticket.setTopic(findIssueTopicByName(requestDto.issueTopicName()));
+        ticket.setCurrentDepartment(department);
+        ticket.setRegion(findRegionByCityName(requestDto.cityName()));
+        ticket.setServiceType(findServiceTypeByName(requestDto.serviceTypeName()));
+        ticket.setInfrastructureType(findInfrastructureTypeByName(requestDto.infrastructureTypeName()));
+        ticket.setAgent(findAgent(requestDto.assignedAgentName(), department));
+
+        ticket.setDescription(requestDto.description());
+        ticket.setPriority(requestDto.priority());
+        ticket.setStatus(resolveStatus(requestDto.status()));
+        ticket.setCreationSource(requestDto.creationSource());
+
+        ticket.setSlaBreached(false);
+        ticket.setResolutionTimeHours(null);
+        ticket.setCustomerSatisfactionScore(null);
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setResolvedAt(null);
 
         return toResponseDto(ticketRepository.save(ticket));
     }
@@ -72,7 +93,24 @@ public class TicketService implements TicketServiceInterface {
     @Override
     public TicketResponseDto updateTicket(UUID id, TicketRequestDto requestDto) {
         Ticket ticket = findTicketOrThrow(id);
-        applyRequestDto(ticket, requestDto);
+        Department department = findDepartmentByName(requestDto.departmentName());
+
+        ticket.setCustomer(findCustomerByFullName(requestDto.customerName()));
+        ticket.setTopic(findIssueTopicByName(requestDto.issueTopicName()));
+        ticket.setCurrentDepartment(department);
+        ticket.setRegion(findRegionByCityName(requestDto.cityName()));
+        ticket.setServiceType(findServiceTypeByName(requestDto.serviceTypeName()));
+        ticket.setInfrastructureType(findInfrastructureTypeByName(requestDto.infrastructureTypeName()));
+        ticket.setAgent(findAgent(requestDto.assignedAgentName(), department));
+
+        ticket.setDescription(requestDto.description());
+        ticket.setPriority(requestDto.priority());
+        ticket.setStatus(resolveStatus(requestDto.status()));
+        ticket.setCreationSource(requestDto.creationSource());
+
+        if ("RESOLVED".equalsIgnoreCase(ticket.getStatus()) || "CLOSED".equalsIgnoreCase(ticket.getStatus())) {
+            ticket.setResolvedAt(LocalDateTime.now());
+        }
 
         return toResponseDto(ticketRepository.save(ticket));
     }
@@ -95,32 +133,74 @@ public class TicketService implements TicketServiceInterface {
                 .orElseThrow(() -> new TicketNotFoundException(id));
     }
 
-    private void applyRequestDto(Ticket ticket, TicketRequestDto requestDto) {
-        ticket.setTicketNumber(requestDto.ticketNumber());
-        ticket.setCustomer(getReference(Customer.class, requestDto.customerId()));
-        ticket.setTopic(getReference(IssueTopic.class, requestDto.topicId()));
-        ticket.setCurrentDepartment(getReference(Department.class, requestDto.currentDepartmentId()));
-        ticket.setAgent(getReference(Agent.class, requestDto.agentId()));
-        ticket.setRegion(getReference(Region.class, requestDto.regionId()));
-        ticket.setServiceType(getReference(ServiceType.class, requestDto.serviceTypeId()));
-        ticket.setInfrastructureType(getReference(InfrastructureType.class, requestDto.infrastructureTypeId()));
-        ticket.setDescription(requestDto.description());
-        ticket.setStatus(requestDto.status());
-        ticket.setPriority(requestDto.priority());
-        ticket.setSlaBreached(requestDto.slaBreached());
-        ticket.setResolutionTimeHours(requestDto.resolutionTimeHours());
-        ticket.setCustomerSatisfactionScore(requestDto.customerSatisfactionScore());
-        ticket.setCreatedAt(requestDto.createdAt());
-        ticket.setResolvedAt(requestDto.resolvedAt());
-        ticket.setCreationSource(requestDto.creationSource());
+    private String generateTicketNumber() {
+        return "TCKT-" + LocalDateTime.now().getYear() + "-" + System.currentTimeMillis();
     }
 
-    private <T> T getReference(Class<T> entityClass, UUID id) {
-        if (id == null) {
-            return null;
+    private String resolveStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return "OPEN";
         }
 
-        return entityManager.getReference(entityClass, id);
+        return status;
+    }
+
+    private Customer findCustomerByFullName(String customerName) {
+        if (customerName == null || customerName.isBlank()) {
+            throw new IllegalArgumentException("Customer name is required");
+        }
+
+        String[] parts = customerName.trim().split("\\s+");
+
+        if (parts.length < 2) {
+            throw new IllegalArgumentException("Customer name must include first name and last name");
+        }
+
+        String lastName = parts[parts.length - 1];
+        String firstName = customerName.substring(0, customerName.lastIndexOf(lastName)).trim();
+
+        return customerRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName, lastName)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + customerName));
+    }
+
+    private IssueTopic findIssueTopicByName(String issueTopicName) {
+        return issueTopicRepository.findByTopicName(issueTopicName)
+                .orElseThrow(() -> new IllegalArgumentException("Issue topic not found: " + issueTopicName));
+    }
+
+    private Department findDepartmentByName(String departmentName) {
+        return departmentRepository.findByDepartmentName(departmentName)
+                .orElseThrow(() -> new IllegalArgumentException("Department not found: " + departmentName));
+    }
+
+    private Region findRegionByCityName(String cityName) {
+        return regionRepository.findByCityName(cityName)
+                .orElseThrow(() -> new IllegalArgumentException("City not found: " + cityName));
+    }
+
+    private ServiceType findServiceTypeByName(String serviceTypeName) {
+        return serviceTypeRepository.findByServiceName(serviceTypeName)
+                .orElseThrow(() -> new IllegalArgumentException("Service type not found: " + serviceTypeName));
+    }
+
+    private InfrastructureType findInfrastructureTypeByName(String infrastructureTypeName) {
+        return infrastructureTypeRepository.findByInfrastructureName(infrastructureTypeName)
+                .orElseThrow(() -> new IllegalArgumentException("Infrastructure type not found: " + infrastructureTypeName));
+    }
+
+    private Agent findAgent(String assignedAgentName, Department department) {
+        if (assignedAgentName == null || assignedAgentName.isBlank()
+                || "Unassigned".equalsIgnoreCase(assignedAgentName)) {
+            return agentRepository.findByDepartment(department)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "No agent found for department: " + department.getDepartmentName()
+                    ));
+        }
+
+        return agentRepository.findByFullNameIgnoreCase(assignedAgentName)
+                .orElseThrow(() -> new IllegalArgumentException("Agent not found: " + assignedAgentName));
     }
 
     private TicketResponseDto toResponseDto(Ticket ticket) {

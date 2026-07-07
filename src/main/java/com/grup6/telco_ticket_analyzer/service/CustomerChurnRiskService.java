@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -21,21 +24,33 @@ public class CustomerChurnRiskService {
 
     private final TicketRepository ticketRepository;
 
- public List<CustomerChurnRiskDto> getCustomerChurnRisk() {
+public Page<CustomerChurnRiskDto> getCustomerChurnRisk(int page, int size) {
     LocalDateTime endDate = LocalDateTime.now();
     LocalDateTime startDate = endDate.minusDays(90);
 
     List<CustomerChurnProjection> tickets =
             ticketRepository.findByCustomerIsNotNullAndCreatedAtBetween(startDate, endDate);
 
-    return tickets.stream()
+    List<CustomerChurnRiskDto> allCustomers = tickets.stream()
             .collect(Collectors.groupingBy(ticket -> ticket.getCustomer().getId()))
             .entrySet()
             .stream()
             .map(entry -> toDto(entry.getKey(), entry.getValue()))
-            .filter(customer -> "HIGH".equals(customer.riskLevel()))
             .sorted(Comparator.comparing(CustomerChurnRiskDto::churnRiskScore).reversed())
             .toList();
+
+    int start = page * size;
+    int end = Math.min(start + size, allCustomers.size());
+
+    List<CustomerChurnRiskDto> pagedContent = start >= allCustomers.size()
+            ? List.of()
+            : allCustomers.subList(start, end);
+
+    return new PageImpl<>(
+            pagedContent,
+            PageRequest.of(page, size),
+            allCustomers.size()
+    );
 }
     private CustomerChurnRiskDto toDto(UUID customerId, List<CustomerChurnProjection> tickets) {
         CustomerInfoProjection customer = tickets.get(0).getCustomer();

@@ -1,11 +1,14 @@
 package com.grup6.telco_ticket_analyzer.controller;
 
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 import com.grup6.telco_ticket_analyzer.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,6 +24,7 @@ public class TicketController {
     @GetMapping
     public PagedResponseDto<TicketResponseDto> getAllTickets(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
             @RequestParam(required = false) UUID topicId,
@@ -28,15 +32,11 @@ public class TicketController {
             @RequestParam(required = false) UUID regionId,
             @RequestParam(required = false) Boolean slaBreached,
             @RequestParam(required = false) UUID agentId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime startDate,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime endDate
-    ) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         return ticketService.getAllTickets(
                 page,
+                size,
                 status,
                 priority,
                 topicId,
@@ -45,8 +45,7 @@ public class TicketController {
                 slaBreached,
                 agentId,
                 startDate,
-                endDate
-        );
+                endDate);
     }
 
     @GetMapping("/{id}")
@@ -55,15 +54,15 @@ public class TicketController {
     }
 
     @PostMapping
-    public TicketResponseDto createTicket(@RequestBody TicketRequestDto requestDto) {
-        return ticketService.createTicket(requestDto);
+    public ResponseEntity<TicketResponseDto> createTicket(@RequestBody TicketCreateDto requestDto) {
+        TicketResponseDto created = ticketService.createTicket(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
     public TicketResponseDto updateTicket(
             @PathVariable UUID id,
-            @RequestBody TicketRequestDto requestDto
-    ) {
+            @RequestBody TicketRequestDto requestDto) {
         return ticketService.updateTicket(id, requestDto);
     }
 

@@ -1,6 +1,7 @@
 package com.grup6.telco_ticket_analyzer.service;
 
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 
@@ -11,6 +12,7 @@ public interface TicketServiceInterface {
 
     PagedResponseDto<TicketResponseDto> getAllTickets(
             int page,
+            int size,
             String status,
             String priority,
             UUID topicId,
@@ -24,7 +26,7 @@ public interface TicketServiceInterface {
 
     TicketResponseDto getTicketById(UUID id);
 
-    TicketResponseDto createTicket(TicketRequestDto requestDto);
+    TicketResponseDto createTicket(TicketCreateDto requestDto);
 
     TicketResponseDto updateTicket(UUID id, TicketRequestDto requestDto);
 

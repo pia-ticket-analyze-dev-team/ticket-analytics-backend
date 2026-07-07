@@ -29,8 +29,9 @@ public class CustomerController {
     @GetMapping
     public PagedResponseDto<CustomerResponseDto> getAllCustomers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
-        return customerService.getAllCustomers(page, size);
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String search) {
+        return customerService.getAllCustomers(page, size, search);
     }
 
     @GetMapping("/{id}")

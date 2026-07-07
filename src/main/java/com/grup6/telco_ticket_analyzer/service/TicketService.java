@@ -1,22 +1,37 @@
 package com.grup6.telco_ticket_analyzer.service;
 
+import com.grup6.telco_ticket_analyzer.dto.NewCustomerDto;
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
+import com.grup6.telco_ticket_analyzer.exception.CustomerNotFoundException;
+import com.grup6.telco_ticket_analyzer.exception.ReferenceDataNotFoundException;
 import com.grup6.telco_ticket_analyzer.exception.TicketNotFoundException;
 import com.grup6.telco_ticket_analyzer.model.*;
+import com.grup6.telco_ticket_analyzer.repository.AgentRepository;
+import com.grup6.telco_ticket_analyzer.repository.CustomerRepository;
+import com.grup6.telco_ticket_analyzer.repository.DepartmentRepository;
+import com.grup6.telco_ticket_analyzer.repository.InfrastructureTypeRepository;
+import com.grup6.telco_ticket_analyzer.repository.IssueTopicRepository;
+import com.grup6.telco_ticket_analyzer.repository.RegionRepository;
+import com.grup6.telco_ticket_analyzer.repository.ServiceTypeRepository;
 import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,14 +40,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TicketService implements TicketServiceInterface {
 
-    private static final int PAGE_SIZE = 50;
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_TICKET_NUMBER_RETRIES = 2;
+    private static final String WEB_CREATION_SOURCE = "CALL_CENTER";
 
     private final TicketRepository ticketRepository;
+    private final CustomerRepository customerRepository;
+    private final DepartmentRepository departmentRepository;
+    private final IssueTopicRepository issueTopicRepository;
+    private final RegionRepository regionRepository;
+    private final AgentRepository agentRepository;
+    private final ServiceTypeRepository serviceTypeRepository;
+    private final InfrastructureTypeRepository infrastructureTypeRepository;
     private final EntityManager entityManager;
 
     @Override
     public PagedResponseDto<TicketResponseDto> getAllTickets(
             int page,
+            int size,
             String status,
             String priority,
             UUID topicId,
@@ -45,7 +71,7 @@ public class TicketService implements TicketServiceInterface {
     ) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
-                PAGE_SIZE,
+                clampSize(size),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
@@ -83,16 +109,85 @@ public class TicketService implements TicketServiceInterface {
         return toResponseDto(findTicketOrThrow(id));
     }
 
-    @Override
-    public TicketResponseDto createTicket(TicketRequestDto requestDto) {
-        Ticket ticket = new Ticket();
-        applyRequestDto(ticket, requestDto);
-
-        if (ticket.getCreatedAt() == null) {
-            ticket.setCreatedAt(LocalDateTime.now());
+    private int clampSize(int size) {
+        if (size < 1) {
+            return DEFAULT_PAGE_SIZE;
         }
+        return Math.min(size, MAX_PAGE_SIZE);
+    }
 
-        return toResponseDto(ticketRepository.save(ticket));
+    @Override
+    @Transactional
+    public TicketResponseDto createTicket(TicketCreateDto requestDto) {
+        Customer customer = requestDto.customerId() != null
+                ? customerRepository.findById(requestDto.customerId())
+                        .orElseThrow(() -> new CustomerNotFoundException(requestDto.customerId()))
+                : customerRepository.save(toNewCustomer(requestDto.newCustomer()));
+
+        IssueTopic topic = issueTopicRepository.findById(requestDto.topicId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Issue topic", requestDto.topicId()));
+        Department department = departmentRepository.findById(requestDto.currentDepartmentId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Department", requestDto.currentDepartmentId()));
+        Agent agent = agentRepository.findById(requestDto.agentId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Agent", requestDto.agentId()));
+        Region region = regionRepository.findById(requestDto.regionId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Region", requestDto.regionId()));
+        ServiceType serviceType = serviceTypeRepository.findById(requestDto.serviceTypeId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Service type", requestDto.serviceTypeId()));
+        InfrastructureType infrastructureType = infrastructureTypeRepository.findById(requestDto.infrastructureTypeId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Infrastructure type", requestDto.infrastructureTypeId()));
+
+        Ticket ticket = new Ticket();
+        ticket.setCustomer(customer);
+        ticket.setTopic(topic);
+        ticket.setCurrentDepartment(department);
+        ticket.setAgent(agent);
+        ticket.setRegion(region);
+        ticket.setServiceType(serviceType);
+        ticket.setInfrastructureType(infrastructureType);
+        ticket.setDescription(requestDto.description());
+        ticket.setStatus(requestDto.status());
+        ticket.setPriority(requestDto.priority());
+        ticket.setSlaBreached(requestDto.slaBreached());
+        ticket.setResolutionTimeHours(requestDto.resolutionTimeHours());
+        ticket.setCustomerSatisfactionScore(requestDto.customerSatisfactionScore());
+        ticket.setCreatedAt(requestDto.createdAt() != null ? requestDto.createdAt() : LocalDateTime.now());
+        ticket.setResolvedAt(requestDto.resolvedAt());
+        ticket.setCreationSource(WEB_CREATION_SOURCE);
+
+        return toResponseDto(saveWithGeneratedTicketNumber(ticket));
+    }
+
+    private Customer toNewCustomer(NewCustomerDto newCustomerDto) {
+        Customer customer = new Customer();
+        customer.setFirstName(newCustomerDto.firstName());
+        customer.setLastName(newCustomerDto.lastName());
+        customer.setEmail(newCustomerDto.email());
+        customer.setAddress(newCustomerDto.address());
+        customer.setBirthdate(newCustomerDto.birthdate());
+        customer.setPhone(newCustomerDto.phone());
+        customer.setSegment(newCustomerDto.segment());
+        customer.setCreatedAt(LocalDate.now());
+        return customer;
+    }
+
+    private Ticket saveWithGeneratedTicketNumber(Ticket ticket) {
+        DataIntegrityViolationException lastFailure = null;
+        for (int attempt = 0; attempt <= MAX_TICKET_NUMBER_RETRIES; attempt++) {
+            ticket.setTicketNumber(generateTicketNumber(ticket.getCreatedAt(), attempt));
+            try {
+                return ticketRepository.saveAndFlush(ticket);
+            } catch (DataIntegrityViolationException ex) {
+                lastFailure = ex;
+            }
+        }
+        throw lastFailure;
+    }
+
+    private String generateTicketNumber(LocalDateTime createdAt, int attemptOffset) {
+        String prefix = "TCK-" + createdAt.format(DateTimeFormatter.ofPattern("yyyyMM")) + "-";
+        long sequence = ticketRepository.countByTicketNumberStartingWith(prefix) + 1 + attemptOffset;
+        return prefix + String.format("%05d", sequence);
     }
 
     @Override

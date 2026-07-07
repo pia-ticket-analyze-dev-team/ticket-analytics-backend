@@ -6,6 +6,8 @@ import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
 import com.grup6.telco_ticket_analyzer.exception.CustomerNotFoundException;
 import com.grup6.telco_ticket_analyzer.model.Customer;
 import com.grup6.telco_ticket_analyzer.repository.CustomerRepository;
+import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
+import com.grup6.telco_ticket_analyzer.repository.projection.SatisfactionScoreProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,8 +25,10 @@ public class CustomerService implements CustomerServiceInterface {
 
     private static final int DEFAULT_PAGE_SIZE = 50;
     private static final int MAX_PAGE_SIZE = 100;
+    private static final List<String> OPEN_STATUSES = List.of("OPEN", "IN_PROGRESS");
 
     private final CustomerRepository customerRepository;
+    private final TicketRepository ticketRepository;
 
     @Override
     public PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search) {
@@ -84,6 +88,34 @@ public class CustomerService implements CustomerServiceInterface {
     @Override
     public void deleteCustomer(UUID id) {
         customerRepository.delete(findCustomerOrThrow(id));
+    }
+
+    @Override
+    public long getTotalTicketCount(UUID customerId) {
+        findCustomerOrThrow(customerId);
+        return ticketRepository.countByCustomerId(customerId);
+    }
+
+    @Override
+    public long getOpenTicketCount(UUID customerId) {
+        findCustomerOrThrow(customerId);
+        return ticketRepository.countByCustomerIdAndStatusIn(customerId, OPEN_STATUSES);
+    }
+
+    @Override
+    public long getSlaBreachCount(UUID customerId) {
+        findCustomerOrThrow(customerId);
+        return ticketRepository.countByCustomerIdAndSlaBreached(customerId, true);
+    }
+
+    @Override
+    public double getAverageSatisfactionScore(UUID customerId) {
+        findCustomerOrThrow(customerId);
+        return ticketRepository.findByCustomerIdAndCustomerSatisfactionScoreIsNotNull(customerId)
+                .stream()
+                .mapToInt(SatisfactionScoreProjection::getCustomerSatisfactionScore)
+                .average()
+                .orElse(0.0);
     }
 
     private Customer findCustomerOrThrow(UUID id) {

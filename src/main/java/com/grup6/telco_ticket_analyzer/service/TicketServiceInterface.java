@@ -26,6 +26,8 @@ public interface TicketServiceInterface {
 
     TicketResponseDto getTicketById(UUID id);
 
+    PagedResponseDto<TicketResponseDto> getTicketsByCustomerId(UUID customerId, int page, int size);
+
     TicketResponseDto createTicket(TicketCreateDto requestDto);
 
     TicketResponseDto updateTicket(UUID id, TicketRequestDto requestDto);

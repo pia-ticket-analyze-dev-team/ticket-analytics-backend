@@ -5,10 +5,8 @@ import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 import com.grup6.telco_ticket_analyzer.service.TicketService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -21,32 +19,9 @@ public class TicketController {
     @GetMapping
     public PagedResponseDto<TicketResponseDto> getAllTickets(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority,
-            @RequestParam(required = false) UUID topicId,
-            @RequestParam(required = false) UUID departmentId,
-            @RequestParam(required = false) UUID regionId,
-            @RequestParam(required = false) Boolean slaBreached,
-            @RequestParam(required = false) UUID agentId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime startDate,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime endDate
+            @RequestParam(defaultValue = "50") int size
     ) {
-        return ticketService.getAllTickets(
-                page,
-                status,
-                priority,
-                topicId,
-                departmentId,
-                regionId,
-                slaBreached,
-                agentId,
-                startDate,
-                endDate
-        );
+        return ticketService.getAllTickets(page, size);
     }
 
     @GetMapping("/{id}")

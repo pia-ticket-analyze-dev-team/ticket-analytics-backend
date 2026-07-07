@@ -7,17 +7,14 @@ import com.grup6.telco_ticket_analyzer.exception.TicketNotFoundException;
 import com.grup6.telco_ticket_analyzer.model.*;
 import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,44 +22,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TicketService implements TicketServiceInterface {
 
-    private static final int PAGE_SIZE = 50;
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 50;
 
     private final TicketRepository ticketRepository;
     private final EntityManager entityManager;
 
     @Override
-    public PagedResponseDto<TicketResponseDto> getAllTickets(
-            int page,
-            String status,
-            String priority,
-            UUID topicId,
-            UUID departmentId,
-            UUID regionId,
-            Boolean slaBreached,
-            UUID agentId,
-            LocalDateTime startDate,
-            LocalDateTime endDate
-    ) {
+    public PagedResponseDto<TicketResponseDto> getAllTickets(int page, int size) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
-                PAGE_SIZE,
+                clampSize(size),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<Ticket> ticketPage = ticketRepository.findAll(
-                buildTicketSpecification(
-                        status,
-                        priority,
-                        topicId,
-                        departmentId,
-                        regionId,
-                        slaBreached,
-                        agentId,
-                        startDate,
-                        endDate
-                ),
-                pageable
-        );
+        Page<Ticket> ticketPage = ticketRepository.findAll(pageable);
 
         List<TicketResponseDto> content = ticketPage.getContent()
                 .stream()
@@ -108,58 +82,12 @@ public class TicketService implements TicketServiceInterface {
         ticketRepository.delete(findTicketOrThrow(id));
     }
 
-    private Specification<Ticket> buildTicketSpecification(
-            String status,
-            String priority,
-            UUID topicId,
-            UUID departmentId,
-            UUID regionId,
-            Boolean slaBreached,
-            UUID agentId,
-            LocalDateTime startDate,
-            LocalDateTime endDate
-    ) {
-        return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    private int clampSize(int size) {
+        if (size < 1) {
+            return DEFAULT_PAGE_SIZE;
+        }
 
-            if (status != null && !status.isBlank()) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), status));
-            }
-
-            if (priority != null && !priority.isBlank()) {
-                predicates.add(criteriaBuilder.equal(root.get("priority"), priority));
-            }
-
-            if (topicId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("topic").get("id"), topicId));
-            }
-
-            if (departmentId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("currentDepartment").get("id"), departmentId));
-            }
-
-            if (regionId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("region").get("id"), regionId));
-            }
-
-            if (slaBreached != null) {
-                predicates.add(criteriaBuilder.equal(root.get("slaBreached"), slaBreached));
-            }
-
-            if (agentId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("agent").get("id"), agentId));
-            }
-
-            if (startDate != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), startDate));
-            }
-
-            if (endDate != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), endDate));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+        return Math.min(size, MAX_PAGE_SIZE);
     }
 
     private Ticket findTicketOrThrow(UUID id) {

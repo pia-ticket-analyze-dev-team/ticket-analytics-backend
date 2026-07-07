@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,67 +21,36 @@ public class ServiceTypeTrendService {
     private final TicketRepository ticketRepository;
 
     public List<ServiceTypeTrendDto> getServiceTypeTrend() {
-    LocalDateTime endDate = LocalDateTime.now();
-    LocalDateTime startDate = endDate.minusMonths(6);
+        YearMonth currentMonth = YearMonth.now();
 
-    List<ServiceTypeTrendProjection> tickets =
-            ticketRepository.findByServiceTypeIsNotNullAndCreatedAtBetween(startDate, endDate);
+        LocalDateTime startDate = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endDate = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
 
-    Map<YearMonth, Long> totalTicketCountByMonth = tickets.stream()
-            .collect(Collectors.groupingBy(
-                    ticket -> YearMonth.from(ticket.getCreatedAt()),
-                    Collectors.counting()
-            ));
+        List<ServiceTypeTrendProjection> tickets =
+                ticketRepository.findByServiceTypeIsNotNullAndCreatedAtBetween(startDate, endDate);
 
-    return tickets.stream()
-            .collect(Collectors.groupingBy(
-                    ticket -> ticket.getServiceType().getId(),
-                    Collectors.groupingBy(
-                            ticket -> YearMonth.from(ticket.getCreatedAt()),
-                            Collectors.toList()
-                    )
-            ))
-            .entrySet()
-            .stream()
-            .flatMap(serviceEntry -> serviceEntry.getValue().entrySet().stream()
-                    .map(monthEntry -> toDto(
-                            serviceEntry.getKey(),
-                            monthEntry.getKey(),
-                            monthEntry.getValue(),
-                            totalTicketCountByMonth
-                    ))
-            )
-            .sorted(Comparator
-                    .comparing(ServiceTypeTrendDto::month)
-                    .thenComparing(ServiceTypeTrendDto::serviceTypeName))
-            .toList();
-}
+        return tickets.stream()
+                .collect(Collectors.groupingBy(ticket -> ticket.getServiceType().getId()))
+                .entrySet()
+                .stream()
+                .map(entry -> toDto(entry.getKey(), currentMonth, entry.getValue()))
+                .sorted(Comparator.comparing(ServiceTypeTrendDto::ticketCount).reversed())
+                .limit(5)
+                .toList();
+    }
 
     private ServiceTypeTrendDto toDto(
             UUID serviceTypeId,
             YearMonth month,
-            List<ServiceTypeTrendProjection> tickets,
-            Map<YearMonth, Long> totalTicketCountByMonth
+            List<ServiceTypeTrendProjection> tickets
     ) {
         ServiceTypeInfoProjection serviceType = tickets.get(0).getServiceType();
-
-        long ticketCount = tickets.size();
-        long monthlyTotal = totalTicketCountByMonth.getOrDefault(month, 0L);
-
-        double percentage = monthlyTotal == 0
-                ? 0
-                : ticketCount * 100.0 / monthlyTotal;
 
         return new ServiceTypeTrendDto(
                 serviceTypeId,
                 serviceType.getServiceName(),
                 month,
-                ticketCount,
-                round(percentage)
+                tickets.size()
         );
-    }
-
-    private double round(double value) {
-        return Math.round(value * 100.0) / 100.0;
     }
 }

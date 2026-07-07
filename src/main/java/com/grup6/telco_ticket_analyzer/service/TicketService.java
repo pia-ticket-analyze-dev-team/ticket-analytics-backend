@@ -105,6 +105,33 @@ public class TicketService implements TicketServiceInterface {
     }
 
     @Override
+    public PagedResponseDto<TicketResponseDto> getTicketsByAgentId(UUID agentId, int page, int size) {
+        agentRepository.findById(agentId)
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Agent", agentId));
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                clampSize(size),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Ticket> ticketPage = ticketRepository.findByAgentId(agentId, pageable);
+
+        List<TicketResponseDto> content = ticketPage.getContent()
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+
+        return new PagedResponseDto<>(
+                content,
+                ticketPage.getNumber(),
+                ticketPage.getSize(),
+                ticketPage.getTotalElements(),
+                ticketPage.getTotalPages()
+        );
+    }
+
+    @Override
     public TicketResponseDto getTicketById(UUID id) {
         return toResponseDto(findTicketOrThrow(id));
     }

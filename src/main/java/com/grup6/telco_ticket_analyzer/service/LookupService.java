@@ -13,8 +13,10 @@ import com.grup6.telco_ticket_analyzer.repository.InfrastructureTypeRepository;
 import com.grup6.telco_ticket_analyzer.repository.IssueTopicRepository;
 import com.grup6.telco_ticket_analyzer.repository.RegionRepository;
 import com.grup6.telco_ticket_analyzer.repository.ServiceTypeRepository;
+import com.grup6.telco_ticket_analyzer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.grup6.telco_ticket_analyzer.model.enums.RiskLevel;
 
 import java.util.Arrays;
 import java.util.Comparator;

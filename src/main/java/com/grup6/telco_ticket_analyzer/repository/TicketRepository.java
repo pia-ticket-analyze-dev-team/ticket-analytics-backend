@@ -50,7 +50,17 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID>, JpaSpecif
 
     long countByCreatedAtBefore(LocalDateTime cutoff);
 
+    long countByTicketNumberStartingWith(String prefix);
+
     long countByStatusAndCreatedAtBefore(String status, LocalDateTime cutoff);
+
+    long countByRegion_GeographicalRegion(String geographicalRegion);
+
+    long countBySlaBreached(boolean slaBreached);
+
+    List<ResolutionTimeProjection> findByRegionIdAndResolutionTimeHoursIsNotNull(UUID regionId);
+
+    List<ResolutionTimeProjection> findByRegion_GeographicalRegionAndResolutionTimeHoursIsNotNull(String geographicalRegion);
 
     List<ResolutionTimeProjection> findByResolutionTimeHoursIsNotNull();
 

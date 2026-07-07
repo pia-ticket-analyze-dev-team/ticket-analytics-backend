@@ -15,10 +15,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     boolean existsByEmail(String email);
 
-    Page<Customer> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+    Page<Customer> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
             String firstName,
             String lastName,
             String email,
+            String phone,
             Pageable pageable
     );
 

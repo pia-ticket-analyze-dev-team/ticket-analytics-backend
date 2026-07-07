@@ -27,14 +27,17 @@ public class CustomerService implements CustomerServiceInterface {
     private final CustomerRepository customerRepository;
 
     @Override
-    public PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size) {
+    public PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 clampSize(size),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<Customer> customerPage = customerRepository.findAll(pageable);
+        Page<Customer> customerPage = (search != null && !search.isBlank())
+                ? customerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
+                        search, search, search, search, pageable)
+                : customerRepository.findAll(pageable);
         List<CustomerResponseDto> content = customerPage.getContent()
                 .stream()
                 .map(this::toResponseDto)

@@ -27,10 +27,13 @@ public class AnalyticsController {
     private final SlaTargetRateService slaTargetRateService;
     private final ServiceTypeTrendService serviceTypeTrendService;
 
-    @GetMapping("/customer-churn-risk")
-    public List<CustomerChurnRiskDto> getCustomerChurnRisk() {
-        return customerChurnRiskService.getCustomerChurnRisk();
-    }
+   @GetMapping("/customer-churn-risk")
+    public Page<CustomerChurnRiskDto> getCustomerChurnRisk(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size
+) {
+    return customerChurnRiskService.getCustomerChurnRisk(page, size);
+}
 
     @GetMapping("/agent-performance")
     public Page<AgentPerformanceDto> getAgentPerformance(

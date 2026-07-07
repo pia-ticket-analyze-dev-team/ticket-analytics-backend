@@ -7,6 +7,11 @@ import com.grup6.telco_ticket_analyzer.repository.projection.AgentPerformancePro
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -21,20 +26,33 @@ public class AgentPerformanceService {
 
     private final TicketRepository ticketRepository;
 
-   public List<AgentPerformanceDto> getAgentPerformance() {
+public Page<AgentPerformanceDto> getAgentPerformance(int page, int size) {
     LocalDateTime endDate = LocalDateTime.now();
     LocalDateTime startDate = endDate.minusDays(30);
 
     List<AgentPerformanceProjection> tickets =
             ticketRepository.findByAgentIsNotNullAndResolvedAtBetween(startDate, endDate);
 
-    return tickets.stream()
+    List<AgentPerformanceDto> allAgentPerformances = tickets.stream()
             .collect(Collectors.groupingBy(ticket -> ticket.getAgent().getId()))
             .entrySet()
             .stream()
             .map(entry -> toDto(entry.getKey(), entry.getValue()))
             .sorted(Comparator.comparing(AgentPerformanceDto::performanceScore).reversed())
             .toList();
+
+    int start = page * size;
+    int end = Math.min(start + size, allAgentPerformances.size());
+
+    List<AgentPerformanceDto> pagedContent = start >= allAgentPerformances.size()
+            ? List.of()
+            : allAgentPerformances.subList(start, end);
+
+    return new PageImpl<>(
+            pagedContent,
+            PageRequest.of(page, size),
+            allAgentPerformances.size()
+    );
 }
 
     private AgentPerformanceDto toDto(UUID agentId, List<AgentPerformanceProjection> tickets) {

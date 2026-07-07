@@ -7,7 +7,6 @@ public record ServiceTypeTrendDto(
         UUID serviceTypeId,
         String serviceTypeName,
         YearMonth month,
-        long ticketCount,
-        double percentage
+        long ticketCount
 ) {
 }

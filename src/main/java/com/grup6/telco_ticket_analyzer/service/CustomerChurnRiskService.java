@@ -33,6 +33,7 @@ public class CustomerChurnRiskService {
             .entrySet()
             .stream()
             .map(entry -> toDto(entry.getKey(), entry.getValue()))
+            .filter(customer -> "HIGH".equals(customer.riskLevel()))
             .sorted(Comparator.comparing(CustomerChurnRiskDto::churnRiskScore).reversed())
             .toList();
 }

@@ -8,14 +8,17 @@ import com.grup6.telco_ticket_analyzer.model.Customer;
 import com.grup6.telco_ticket_analyzer.repository.CustomerRepository;
 import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
 import com.grup6.telco_ticket_analyzer.repository.projection.SatisfactionScoreProjection;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,17 +34,14 @@ public class CustomerService implements CustomerServiceInterface {
     private final TicketRepository ticketRepository;
 
     @Override
-    public PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search) {
+    public PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search, String segment) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 clampSize(size),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<Customer> customerPage = (search != null && !search.isBlank())
-                ? customerRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
-                        search, search, search, search, pageable)
-                : customerRepository.findAll(pageable);
+        Page<Customer> customerPage = customerRepository.findAll(buildCustomerSpecification(search, segment), pageable);
         List<CustomerResponseDto> content = customerPage.getContent()
                 .stream()
                 .map(this::toResponseDto)
@@ -54,6 +54,28 @@ public class CustomerService implements CustomerServiceInterface {
                 customerPage.getTotalElements(),
                 customerPage.getTotalPages()
         );
+    }
+
+    private Specification<Customer> buildCustomerSpecification(String search, String segment) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (search != null && !search.isBlank()) {
+                String pattern = "%" + search.toLowerCase() + "%";
+                predicates.add(criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), pattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), pattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), pattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("phone")), pattern)
+                ));
+            }
+
+            if (segment != null && !segment.isBlank()) {
+                predicates.add(criteriaBuilder.equal(root.get("segment"), segment));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     private int clampSize(int size) {

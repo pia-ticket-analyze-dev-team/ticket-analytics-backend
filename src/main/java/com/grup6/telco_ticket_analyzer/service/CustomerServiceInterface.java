@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface CustomerServiceInterface {
 
-    PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search);
+    PagedResponseDto<CustomerResponseDto> getAllCustomers(int page, int size, String search, String segment);
 
     CustomerResponseDto getCustomerById(UUID id);
 

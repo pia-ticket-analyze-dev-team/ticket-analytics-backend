@@ -29,6 +29,9 @@ public record TicketResponseDto(
         Integer customerSatisfactionScore,
         LocalDateTime createdAt,
         LocalDateTime resolvedAt,
-        String creationSource
+        String creationSource,
+        Integer slaTargetHours,
+        String slaStatus,
+        Long slaHoursRemaining
 ) {
 }

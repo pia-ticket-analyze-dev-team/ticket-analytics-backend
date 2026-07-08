@@ -29,7 +29,8 @@ public interface TicketServiceInterface {
 
     PagedResponseDto<TicketResponseDto> getTicketsByCustomerId(UUID customerId, int page, int size);
 
-    PagedResponseDto<TicketResponseDto> getTicketsByAgentId(UUID agentId, int page, int size);
+    PagedResponseDto<TicketResponseDto> getTicketsByAgentId(
+            UUID agentId, int page, int size, String status, String priority);
 
     TicketResponseDto createTicket(TicketCreateDto requestDto);
 

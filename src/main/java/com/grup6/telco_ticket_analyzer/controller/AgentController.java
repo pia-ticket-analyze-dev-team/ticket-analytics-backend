@@ -23,7 +23,9 @@ public class AgentController {
     public PagedResponseDto<TicketResponseDto> getAgentTickets(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
-        return ticketService.getTicketsByAgentId(id, page, size);
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority) {
+        return ticketService.getTicketsByAgentId(id, page, size, status, priority);
     }
 }

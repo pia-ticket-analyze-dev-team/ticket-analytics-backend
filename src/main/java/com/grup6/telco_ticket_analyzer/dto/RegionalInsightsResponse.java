@@ -5,6 +5,6 @@ import java.util.List;
 public record RegionalInsightsResponse(
         RegionalKpiSummaryDto kpis,
         List<RegionDensityDto> regionDensity,
-        List<TopCityDto> topCities
+        List<CityDensityDto> cityDensity
 ) {
 }

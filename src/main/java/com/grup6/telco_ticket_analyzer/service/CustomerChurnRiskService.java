@@ -6,6 +6,7 @@ import com.grup6.telco_ticket_analyzer.repository.projection.CustomerChurnProjec
 import com.grup6.telco_ticket_analyzer.repository.projection.CustomerInfoProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.grup6.telco_ticket_analyzer.model.enums.RiskLevel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class CustomerChurnRiskService {
 
     private final TicketRepository ticketRepository;
 
-public Page<CustomerChurnRiskDto> getCustomerChurnRisk(int page, int size) {
+public Page<CustomerChurnRiskDto> getCustomerChurnRisk(int page, int size, String segment, String riskLevel) {
     LocalDateTime endDate = LocalDateTime.now();
     LocalDateTime startDate = endDate.minusDays(90);
 
@@ -36,6 +37,10 @@ public Page<CustomerChurnRiskDto> getCustomerChurnRisk(int page, int size) {
             .entrySet()
             .stream()
             .map(entry -> toDto(entry.getKey(), entry.getValue()))
+            .filter(customer -> segment == null || segment.isBlank()
+            || customer.customerSegment().equalsIgnoreCase(segment))
+            .filter(customer -> riskLevel == null || riskLevel.isBlank()
+            || customer.riskLevel().equalsIgnoreCase(riskLevel))
             .sorted(Comparator.comparing(CustomerChurnRiskDto::churnRiskScore).reversed())
             .toList();
 
@@ -127,17 +132,17 @@ public Page<CustomerChurnRiskDto> getCustomerChurnRisk(int page, int size) {
         return Math.min(averageResolutionHours * 5, 100);
     }
 
-    private String getRiskLevel(double churnRiskScore) {
-        if (churnRiskScore >= 70) {
-            return "HIGH";
-        }
-
-        if (churnRiskScore >= 40) {
-            return "MEDIUM";
-        }
-
-        return "LOW";
+   private String getRiskLevel(double churnRiskScore) {
+    if (churnRiskScore >= 70) {
+        return RiskLevel.HIGH.name();
     }
+
+    if (churnRiskScore >= 40) {
+        return RiskLevel.MEDIUM.name();
+    }
+
+    return RiskLevel.LOW.name();
+}
 
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;

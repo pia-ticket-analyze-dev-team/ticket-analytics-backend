@@ -13,9 +13,12 @@ import com.grup6.telco_ticket_analyzer.repository.InfrastructureTypeRepository;
 import com.grup6.telco_ticket_analyzer.repository.IssueTopicRepository;
 import com.grup6.telco_ticket_analyzer.repository.RegionRepository;
 import com.grup6.telco_ticket_analyzer.repository.ServiceTypeRepository;
+import com.grup6.telco_ticket_analyzer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.grup6.telco_ticket_analyzer.model.enums.RiskLevel;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +33,7 @@ public class LookupService {
     private final AgentRepository agentRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final InfrastructureTypeRepository infrastructureTypeRepository;
+    private final CustomerRepository customerRepository;
 
     public List<LookupDto> getDepartments() {
         return sorted(departmentRepository.findAll().stream()
@@ -63,6 +67,23 @@ public class LookupService {
 
         return sorted(agents.stream()
                 .map(agent -> new LookupDto(agent.getId(), agent.getFullName())));
+    }
+
+    public List<LookupDto> getCustomerSegments() {
+        return customerRepository.findAll()
+                .stream()
+                .map(customer -> customer.getSegment())
+                .filter(segment -> segment != null && !segment.isBlank())
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .map(segment -> new LookupDto(null, segment))
+                .toList();
+    }
+
+    public List<LookupDto> getRiskLevels() {
+        return Arrays.stream(RiskLevel.values())
+                .map(riskLevel -> new LookupDto(null, riskLevel.name()))
+                .toList();
     }
 
     private List<LookupDto> sorted(java.util.stream.Stream<LookupDto> stream) {

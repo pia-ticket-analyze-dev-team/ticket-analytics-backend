@@ -7,6 +7,7 @@ public record LoginResponseDto(
         String email,
         String fullName,
         String role,
-        UUID agentId
+        UUID agentId,
+        String departmentCode
 ) {
 }

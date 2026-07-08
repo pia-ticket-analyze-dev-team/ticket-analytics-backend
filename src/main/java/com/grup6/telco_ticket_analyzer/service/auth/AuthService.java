@@ -38,13 +38,18 @@ public class AuthService {
 
         String fullName = buildFullName(userAccount.getFirstName(), userAccount.getLastName());
         String roleCode = userAccount.getRole() != null ? userAccount.getRole().getRoleCode() : null;
+        String departmentCode = null;
+        if (userAccount.getAgent() != null && userAccount.getAgent().getDepartment() != null) {
+            departmentCode = userAccount.getAgent().getDepartment().getDepartmentCode();
+        }
 
         return new LoginResponseDto(
                 userAccount.getId(),
                 userAccount.getEmail(),
                 fullName,
                 roleCode,
-                userAccount.getAgent() != null ? userAccount.getAgent().getId() : null
+                userAccount.getAgent() != null ? userAccount.getAgent().getId() : null,
+                departmentCode
         );
     }
 

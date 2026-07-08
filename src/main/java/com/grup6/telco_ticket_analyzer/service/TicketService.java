@@ -51,6 +51,9 @@ public class TicketService implements TicketServiceInterface {
     private static final List<String> OPEN_STATUSES = List.of("OPEN", "IN_PROGRESS");
     private static final List<String> NON_FORWARDABLE_STATUSES = List.of("RESOLVED", "CLOSED");
     private static final String FORWARD_ACTION_TYPE = "ROUTING";
+    private static final String SLA_STATUS_ON_TRACK = "ON_TRACK";
+    private static final String SLA_STATUS_BREACHED = "BREACHED";
+    private static final String SLA_STATUS_COMPLETED = "COMPLETED";
 
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
@@ -113,7 +116,8 @@ public class TicketService implements TicketServiceInterface {
     }
 
     @Override
-    public PagedResponseDto<TicketResponseDto> getTicketsByAgentId(UUID agentId, int page, int size) {
+    public PagedResponseDto<TicketResponseDto> getTicketsByAgentId(
+            UUID agentId, int page, int size, String status, String priority) {
         agentRepository.findById(agentId)
                 .orElseThrow(() -> new ReferenceDataNotFoundException("Agent", agentId));
 
@@ -123,7 +127,10 @@ public class TicketService implements TicketServiceInterface {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<Ticket> ticketPage = ticketRepository.findByAgentId(agentId, pageable);
+        Page<Ticket> ticketPage = ticketRepository.findAll(
+                buildTicketSpecification(status, priority, null, null, null, null, agentId, null, null),
+                pageable
+        );
 
         List<TicketResponseDto> content = ticketPage.getContent()
                 .stream()
@@ -420,6 +427,7 @@ public class TicketService implements TicketServiceInterface {
     }
 
     private TicketResponseDto toResponseDto(Ticket ticket) {
+        SlaSnapshot slaSnapshot = computeSlaSnapshot(ticket);
         return new TicketResponseDto(
                 ticket.getId(),
                 ticket.getTicketNumber(),
@@ -445,8 +453,34 @@ public class TicketService implements TicketServiceInterface {
                 ticket.getCustomerSatisfactionScore(),
                 ticket.getCreatedAt(),
                 ticket.getResolvedAt(),
-                ticket.getCreationSource()
+                ticket.getCreationSource(),
+                ticket.getTopic() != null ? ticket.getTopic().getSlaTargetHours() : null,
+                slaSnapshot.status(),
+                slaSnapshot.hoursRemaining()
         );
+    }
+
+    private SlaSnapshot computeSlaSnapshot(Ticket ticket) {
+        if (ticket.getTopic() == null || ticket.getTopic().getSlaTargetHours() == null || ticket.getCreatedAt() == null) {
+            return new SlaSnapshot(null, null);
+        }
+
+        LocalDateTime deadline = ticket.getCreatedAt().plusHours(ticket.getTopic().getSlaTargetHours());
+
+        if (ticket.getResolvedAt() != null) {
+            boolean breached = ticket.getResolvedAt().isAfter(deadline);
+            return new SlaSnapshot(breached ? SLA_STATUS_BREACHED : SLA_STATUS_COMPLETED, null);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(deadline)) {
+            return new SlaSnapshot(SLA_STATUS_BREACHED, null);
+        }
+
+        return new SlaSnapshot(SLA_STATUS_ON_TRACK, Duration.between(now, deadline).toHours());
+    }
+
+    private record SlaSnapshot(String status, Long hoursRemaining) {
     }
 
     private String getCustomerName(Ticket ticket) {

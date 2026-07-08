@@ -1,9 +1,9 @@
 package com.grup6.telco_ticket_analyzer.service.analytics;
 
+import com.grup6.telco_ticket_analyzer.dto.analytics.CityDensityDto;
 import com.grup6.telco_ticket_analyzer.dto.analytics.RegionDensityDto;
 import com.grup6.telco_ticket_analyzer.dto.analytics.RegionalInsightsResponse;
 import com.grup6.telco_ticket_analyzer.dto.analytics.RegionalKpiSummaryDto;
-import com.grup6.telco_ticket_analyzer.dto.analytics.TopCityDto;
 import com.grup6.telco_ticket_analyzer.model.Region;
 import com.grup6.telco_ticket_analyzer.repository.RegionRepository;
 import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
@@ -21,7 +21,6 @@ import java.util.stream.IntStream;
 @Transactional(readOnly = true)
 public class RegionalInsightsService {
 
-    private static final int TOP_N = 5;
     private static final double HIGH_DENSITY_RATIO = 0.66;
     private static final double MEDIUM_DENSITY_RATIO = 0.33;
 
@@ -52,7 +51,7 @@ public class RegionalInsightsService {
         return new RegionalInsightsResponse(
                 buildKpiSummary(cityStats),
                 buildRegionDensity(geographicalRegionStats),
-                buildTopCities(cityStats)
+                buildCityDensity(cityStats)
         );
     }
 
@@ -87,16 +86,26 @@ public class RegionalInsightsService {
                 .toList();
     }
 
-    private List<TopCityDto> buildTopCities(List<NamedResolutionStat> cityStats) {
-        List<NamedResolutionStat> topN = cityStats.stream()
+    private List<CityDensityDto> buildCityDensity(List<NamedResolutionStat> cityStats) {
+        long maxTicketCount = cityStats.stream()
+                .mapToLong(NamedResolutionStat::ticketCount)
+                .max()
+                .orElse(0);
+
+        List<NamedResolutionStat> sorted = cityStats.stream()
                 .sorted(Comparator.comparingLong(NamedResolutionStat::ticketCount).reversed())
-                .limit(TOP_N)
                 .toList();
 
-        return IntStream.range(0, topN.size())
+        return IntStream.range(0, sorted.size())
                 .mapToObj(i -> {
-                    NamedResolutionStat stat = topN.get(i);
-                    return new TopCityDto(i + 1, stat.name(), stat.ticketCount(), round2(stat.avgResolutionTimeHours()));
+                    NamedResolutionStat stat = sorted.get(i);
+                    return new CityDensityDto(
+                            i + 1,
+                            stat.name(),
+                            stat.ticketCount(),
+                            round2(stat.avgResolutionTimeHours()),
+                            classifyDensity(stat.ticketCount(), maxTicketCount)
+                    );
                 })
                 .toList();
     }

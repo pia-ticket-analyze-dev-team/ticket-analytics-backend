@@ -2,6 +2,7 @@ package com.grup6.telco_ticket_analyzer.service;
 
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketForwardRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 
@@ -33,6 +34,8 @@ public interface TicketServiceInterface {
     TicketResponseDto createTicket(TicketCreateDto requestDto);
 
     TicketResponseDto updateTicket(UUID id, TicketRequestDto requestDto);
+
+    TicketResponseDto forwardTicket(UUID ticketId, TicketForwardRequestDto requestDto);
 
     void deleteTicket(UUID id);
 }

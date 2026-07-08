@@ -3,6 +3,7 @@ package com.grup6.telco_ticket_analyzer.service;
 import com.grup6.telco_ticket_analyzer.dto.NewCustomerDto;
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketForwardRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 import com.grup6.telco_ticket_analyzer.exception.CustomerNotFoundException;
@@ -17,6 +18,7 @@ import com.grup6.telco_ticket_analyzer.repository.IssueTopicRepository;
 import com.grup6.telco_ticket_analyzer.repository.RegionRepository;
 import com.grup6.telco_ticket_analyzer.repository.ServiceTypeRepository;
 import com.grup6.telco_ticket_analyzer.repository.TicketRepository;
+import com.grup6.telco_ticket_analyzer.repository.TicketStateHistoryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +31,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +48,9 @@ public class TicketService implements TicketServiceInterface {
     private static final int MAX_PAGE_SIZE = 100;
     private static final int MAX_TICKET_NUMBER_RETRIES = 2;
     private static final String WEB_CREATION_SOURCE = "CALL_CENTER";
+    private static final List<String> OPEN_STATUSES = List.of("OPEN", "IN_PROGRESS");
+    private static final List<String> NON_FORWARDABLE_STATUSES = List.of("RESOLVED", "CLOSED");
+    private static final String FORWARD_ACTION_TYPE = "ROUTING";
 
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
@@ -53,6 +60,7 @@ public class TicketService implements TicketServiceInterface {
     private final AgentRepository agentRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final InfrastructureTypeRepository infrastructureTypeRepository;
+    private final TicketStateHistoryRepository ticketStateHistoryRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -247,6 +255,76 @@ public class TicketService implements TicketServiceInterface {
         applyRequestDto(ticket, requestDto);
 
         return toResponseDto(ticketRepository.save(ticket));
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDto forwardTicket(UUID ticketId, TicketForwardRequestDto requestDto) {
+        Ticket ticket = findTicketOrThrow(ticketId);
+
+        if (NON_FORWARDABLE_STATUSES.contains(ticket.getStatus())) {
+            throw new IllegalArgumentException(
+                    "Ticket with status " + ticket.getStatus() + " cannot be forwarded");
+        }
+
+        if (ticket.getAgent() == null || !ticket.getAgent().getId().equals(requestDto.agentId())) {
+            throw new IllegalArgumentException("Only the agent currently assigned to this ticket can forward it");
+        }
+
+        Department targetDepartment = departmentRepository.findById(requestDto.targetDepartmentId())
+                .orElseThrow(() -> new ReferenceDataNotFoundException("Department", requestDto.targetDepartmentId()));
+
+        if (targetDepartment.getId().equals(ticket.getCurrentDepartment().getId())) {
+            throw new IllegalArgumentException("Ticket is already assigned to this department");
+        }
+
+        Department previousDepartment = ticket.getCurrentDepartment();
+        Agent previousAgent = ticket.getAgent();
+        Agent newAgent = findLeastBusyAgent(targetDepartment.getId());
+
+        ticket.setCurrentDepartment(targetDepartment);
+        ticket.setAgent(newAgent);
+        Ticket saved = ticketRepository.save(ticket);
+
+        recordForwardHistory(saved, previousDepartment, targetDepartment, previousAgent);
+
+        return toResponseDto(saved);
+    }
+
+    private Agent findLeastBusyAgent(UUID departmentId) {
+        List<Agent> agents = agentRepository.findByDepartmentId(departmentId);
+        if (agents.isEmpty()) {
+            throw new ReferenceDataNotFoundException("Available agent in department", departmentId);
+        }
+
+        return agents.stream()
+                .min(Comparator.comparingLong(
+                        agent -> ticketRepository.countByAgentIdAndStatusIn(agent.getId(), OPEN_STATUSES)))
+                .orElseThrow();
+    }
+
+    private void recordForwardHistory(
+            Ticket ticket,
+            Department previousDepartment,
+            Department newDepartment,
+            Agent changedByAgent) {
+        LocalDateTime changedAt = LocalDateTime.now();
+        LocalDateTime previousChangeAt = ticketStateHistoryRepository.findTopByTicketIdOrderByChangedAtDesc(ticket.getId())
+                .map(TicketStateHistory::getChangedAt)
+                .orElse(ticket.getCreatedAt());
+
+        TicketStateHistory history = new TicketStateHistory();
+        history.setTicket(ticket);
+        history.setPreviousDepartment(previousDepartment);
+        history.setNewDepartment(newDepartment);
+        history.setPreviousStatus(ticket.getStatus());
+        history.setNewStatus(ticket.getStatus());
+        history.setActionType(FORWARD_ACTION_TYPE);
+        history.setChangedByAgent(changedByAgent);
+        history.setChangedAt(changedAt);
+        history.setDurationMinutes((int) Duration.between(previousChangeAt, changedAt).toMinutes());
+
+        ticketStateHistoryRepository.save(history);
     }
 
     @Override

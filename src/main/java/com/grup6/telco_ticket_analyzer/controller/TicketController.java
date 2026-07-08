@@ -2,6 +2,7 @@ package com.grup6.telco_ticket_analyzer.controller;
 
 import com.grup6.telco_ticket_analyzer.dto.PagedResponseDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketCreateDto;
+import com.grup6.telco_ticket_analyzer.dto.TicketForwardRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketRequestDto;
 import com.grup6.telco_ticket_analyzer.dto.TicketResponseDto;
 import com.grup6.telco_ticket_analyzer.service.TicketService;
@@ -64,6 +65,13 @@ public class TicketController {
             @PathVariable UUID id,
             @RequestBody TicketRequestDto requestDto) {
         return ticketService.updateTicket(id, requestDto);
+    }
+
+    @PostMapping("/{id}/forward")
+    public TicketResponseDto forwardTicket(
+            @PathVariable UUID id,
+            @RequestBody TicketForwardRequestDto requestDto) {
+        return ticketService.forwardTicket(id, requestDto);
     }
 
     @DeleteMapping("/{id}")

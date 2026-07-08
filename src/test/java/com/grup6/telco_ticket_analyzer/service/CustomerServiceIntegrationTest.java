@@ -58,7 +58,7 @@ class CustomerServiceIntegrationTest {
             createAndSaveCustomer("Bob", "Johnson", "bob@example.com", "Premium");
 
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, null);
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, null, null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -76,12 +76,46 @@ class CustomerServiceIntegrationTest {
             createAndSaveCustomer("Bob", "Johnson", "bob@example.com", "Premium");
 
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "jane");
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "jane", null);
 
             // Assert
             assertThat(result).isNotNull();
             assertThat(result.content()).hasSize(1);
             assertThat(result.content().get(0).firstName()).isEqualTo("Jane");
+        }
+
+        @Test
+        @DisplayName("Success: Should retrieve customers with segment filter")
+        void testGetAllCustomersWithSegmentSuccess() {
+            // Arrange
+            createAndSaveCustomer("Jane", "Smith", "jane@example.com", "Standard");
+            createAndSaveCustomer("Bob", "Johnson", "bob@example.com", "Premium");
+
+            // Act
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, null, "Premium");
+
+            // Assert
+            assertThat(result).isNotNull();
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content())
+                    .extracting(CustomerResponseDto::segment)
+                    .containsOnly("Premium");
+        }
+
+        @Test
+        @DisplayName("Success: Should combine search and segment filters")
+        void testGetAllCustomersWithSearchAndSegmentSuccess() {
+            // Arrange
+            createAndSaveCustomer("Jane", "Smith", "jane@example.com", "Standard");
+            createAndSaveCustomer("Jane", "Johnson", "jane.johnson@example.com", "Premium");
+
+            // Act
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "jane", "Premium");
+
+            // Assert
+            assertThat(result).isNotNull();
+            assertThat(result.content()).hasSize(1);
+            assertThat(result.content().get(0).lastName()).isEqualTo("Johnson");
         }
 
         @Test
@@ -91,7 +125,7 @@ class CustomerServiceIntegrationTest {
             createAndSaveCustomer("Jane", "Smith", "jane.smith@example.com", "Standard");
 
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "jane.smith");
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "jane.smith", null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -107,7 +141,7 @@ class CustomerServiceIntegrationTest {
             customerRepository.save(testCustomer);
 
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "1234567");
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "1234567", null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -119,7 +153,7 @@ class CustomerServiceIntegrationTest {
         @DisplayName("Edge Case: Should handle empty search results")
         void testGetAllCustomersEmptySearchResults() {
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "NonExistentSearch");
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 10, "NonExistentSearch", null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -131,7 +165,7 @@ class CustomerServiceIntegrationTest {
         @DisplayName("Edge Case: Should apply page size limit (MAX_PAGE_SIZE = 100)")
         void testGetAllCustomersPageSizeLimit() {
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 1000, null);
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 1000, null, null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -142,7 +176,7 @@ class CustomerServiceIntegrationTest {
         @DisplayName("Edge Case: Should default to page size 50 when size < 1")
         void testGetAllCustomersDefaultPageSize() {
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 0, null);
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(0, 0, null, null);
 
             // Assert
             assertThat(result).isNotNull();
@@ -153,7 +187,7 @@ class CustomerServiceIntegrationTest {
         @DisplayName("Edge Case: Should handle negative page number by treating as 0")
         void testGetAllCustomersNegativePageNumber() {
             // Act
-            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(-5, 10, null);
+            PagedResponseDto<CustomerResponseDto> result = customerService.getAllCustomers(-5, 10, null, null);
 
             // Assert
             assertThat(result).isNotNull();

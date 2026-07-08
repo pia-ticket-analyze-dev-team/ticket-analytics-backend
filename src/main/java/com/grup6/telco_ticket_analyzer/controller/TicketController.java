@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class TicketController {
 
     private final TicketService ticketService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CALL_CENTER_AGENT')")
     @GetMapping
     public PagedResponseDto<TicketResponseDto> getAllTickets(
             @RequestParam(defaultValue = "0") int page,
@@ -48,17 +50,20 @@ public class TicketController {
                 endDate);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CALL_CENTER_AGENT')")
     @GetMapping("/{id}")
     public TicketResponseDto getTicketById(@PathVariable UUID id) {
         return ticketService.getTicketById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CALL_CENTER_AGENT')")
     @PostMapping
     public ResponseEntity<TicketResponseDto> createTicket(@RequestBody TicketCreateDto requestDto) {
         TicketResponseDto created = ticketService.createTicket(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CALL_CENTER_AGENT')")
     @PutMapping("/{id}")
     public TicketResponseDto updateTicket(
             @PathVariable UUID id,
@@ -66,6 +71,8 @@ public class TicketController {
         return ticketService.updateTicket(id, requestDto);
     }
 
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CALL_CENTER_AGENT')")
     @DeleteMapping("/{id}")
     public void deleteTicket(@PathVariable UUID id) {
         ticketService.deleteTicket(id);

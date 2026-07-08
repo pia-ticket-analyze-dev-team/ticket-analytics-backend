@@ -26,6 +26,9 @@ services:
       - DB_NAME=mydatabase
       - DB_USER=myuser
       - DB_PASSWORD=12345
+      - JWT_SECRET=VGhpcy1pcy1hLWRldi1zZWNyZXQta2V5LWZvci1waWEtdGlja2V0LWFuYWx5emVyLTEyMzQ1Njc4OTAxMjM0NTY=
+      - JWT_ACCESS_TOKEN_EXPIRATION_MS=900000
+      - JWT_REFRESH_TOKEN_EXPIRATION_MS=2592000000
     ports:
       - '8080:8080'
     depends_on:

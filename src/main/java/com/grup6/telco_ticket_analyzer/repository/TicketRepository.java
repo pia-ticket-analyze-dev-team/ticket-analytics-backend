@@ -27,6 +27,8 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID>, JpaSpecif
 
     long countByCustomerIdAndSlaBreached(UUID customerId, boolean slaBreached);
 
+    long countByAgentIdAndStatusIn(UUID agentId, Collection<String> statuses);
+
     List<SatisfactionScoreProjection> findByCustomerIdAndCustomerSatisfactionScoreIsNotNull(UUID customerId);
 
     Page<Ticket> findByStatus(String status, Pageable pageable);

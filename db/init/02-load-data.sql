@@ -22,6 +22,14 @@ COPY agent(id, department_id, full_name)
 FROM '/docker-entrypoint-initdb.d/seed-data/agent.csv'
 WITH (FORMAT csv, HEADER true);
 
+COPY user_role(id, role_code, role_name, description)
+FROM '/docker-entrypoint-initdb.d/seed-data/user_role.csv'
+WITH (FORMAT csv, HEADER true);
+
+COPY user_account(id, agent_id, role_id, first_name, last_name, email, password_hash, is_active, created_at, updated_at)
+FROM '/docker-entrypoint-initdb.d/seed-data/user_account.csv'
+WITH (FORMAT csv, HEADER true);
+
 COPY customer(id, first_name, last_name, email, address, birthdate, phone, created_at, segment)
 FROM '/docker-entrypoint-initdb.d/seed-data/customer.csv'
 WITH (FORMAT csv, HEADER true);

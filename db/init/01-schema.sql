@@ -34,6 +34,26 @@ CREATE TABLE IF NOT EXISTS agent (
     full_name     VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS user_role (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role_code   VARCHAR(50) NOT NULL UNIQUE,
+    role_name   VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS user_account (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id      UUID UNIQUE REFERENCES agent(id),
+    role_id       UUID NOT NULL REFERENCES user_role(id),
+    first_name    VARCHAR(255) NOT NULL,
+    last_name     VARCHAR(255) NOT NULL,
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_active     BOOLEAN NOT NULL DEFAULT true,
+    created_at    TIMESTAMP NOT NULL,
+    updated_at    TIMESTAMP NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS customer (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name VARCHAR(255) NOT NULL,

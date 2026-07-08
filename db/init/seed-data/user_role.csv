@@ -1,0 +1,3 @@
+id,role_code,role_name,description
+6e586406-477f-4257-8c12-f1b6952a8601,ADMIN,Administrator,Tum sayfalara ve analiz ekranlarina tam erisimi olan sistem yoneticisi.
+a1b26ad0-6367-41ff-a952-85c54046fa5d,AGENT,Support Agent,Departmanina gore ticket olusturan veya kendi taleplerini goruntuleyen destek temsilcisi.

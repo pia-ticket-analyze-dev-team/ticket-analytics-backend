@@ -1,19 +1,19 @@
 id,topic_name,sla_target_hours
-c140742c-e491-4c0a-9bb3-f12c68c7ad7c,SIM Replacement,24
-463735a5-9b2d-4f73-8624-c6ed5eaddd87,SIM Activation,24
-e31420e7-e46c-4acf-87a6-10e6d59e6e3a,Roaming Issue,48
-28e2418e-07b2-441b-a8f3-8c8f7f7e2ab9,SMS Issue,24
-c6678c6f-da0a-4d40-8ede-44c570392aff,Coverage Issue,48
-ddd51fae-ed59-4db7-9af2-9beb904849de,Call Issue,24
-02eab36d-f149-4c7f-96f4-871131397f9f,Mobile App Issue,72
-903e29d9-1c97-4990-afca-265ca2c5bbe1,Slow Internet,48
-dc662c2d-75ff-4044-a758-3f75f102e06b,Connection Issue,24
-801fa952-a41b-46bf-9354-44a1a5fea8f5,Device Support,72
-a51cb0c5-7758-4dd0-b76d-dc4869d79c9f,Network Outage,4
-c325685f-9894-44cd-8d55-84c279532775,Billing Issue,72
-bdf35178-9726-49e8-892a-f35fb1855e29,Payment Issue,72
-edcbb985-58d1-4ab1-9c5f-1c0765d60809,Account Access,24
-e26c74bb-b704-44e5-b23d-8a7ac95b24c5,Login Access,24
-d42ab869-fe77-4126-b5f7-7e06c3d9a3a6,Contract & Subscription,72
-f2a59ea6-b076-4605-9b92-837a0cd7ee66,Other,72
-989966d5-46ed-4425-b732-930f9364befd,System Alarm / Hardware Warning,12
+80ce66d7-0489-4281-be28-09f2d3dd7c26,SIM Replacement,24
+eac3d5dd-cd99-4436-9f6b-ff994ef5abaf,SIM Activation,24
+063b8268-30a2-4d7a-aa64-b9896bebcb23,Roaming Issue,48
+ce4b6055-e4f3-47d1-8a94-ac2824f0218d,SMS Issue,24
+bdedbe71-21e6-45b5-a620-0ce31a642d50,Coverage Issue,48
+4b84fd19-af9b-4181-abaa-fd18c22c5fc5,Call Issue,24
+8e8dc7f0-671f-4a16-a676-c57152f108a4,Mobile App Issue,72
+39373768-7bb5-4330-b151-1e7cf4cda360,Slow Internet,48
+5576645b-5534-415f-8c60-441480073066,Connection Issue,24
+da9c0371-d23e-498c-bb18-3ed2024a83b1,Device Support,72
+b85f1ce6-62a2-4d0b-9139-429857482133,Network Outage,4
+4ee473c6-ae2a-4e69-abdb-f42080966cc9,Billing Issue,72
+fc7398f6-96c4-409b-acca-92f8fa73f76e,Payment Issue,72
+347a6dac-fc80-42cd-8ca4-ca056e1aea66,Account Access,24
+4959e59a-fee5-4536-8af1-b0d553a431af,Login Access,24
+4595c625-dcf1-48e8-ba22-de082dd5efd3,Contract & Subscription,72
+5407f76f-5750-4185-98f2-d6c1112aa567,Other,72
+b7af93b4-3646-487b-8afa-acc223e2135a,System Alarm / Hardware Warning,12

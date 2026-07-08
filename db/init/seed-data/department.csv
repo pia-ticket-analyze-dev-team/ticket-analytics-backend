@@ -1,8 +1,8 @@
 id,department_name,department_code
-8395a5dd-ec50-49b6-8809-87787dade5ec,Front Office,FRONT
-0da5aa61-a72d-4ac1-841b-3babadc6b154,Network Operations,NET
-4316a3a6-bdef-41c4-8607-435918edb8d4,Field Operations,FLDO
-bd9c1bea-7f01-450d-9a4e-013bd1e65460,IT,IT
-6c03e07a-8b88-4eb8-9db6-ba6d3953a66a,Finance,FIN
-172a5366-b5d8-44a2-b430-f15273d306e9,Technical Support,TECH
-8d3a06a4-7181-4391-aa99-b9e2769cead6,Customer Relations,CREL
+dddc1f11-e6eb-43b9-a1cb-04c11ef776a2,Front Office,FRONT
+11fb449a-0188-4792-9a84-c3a7b26094a2,Network Operations,NET
+8591fd81-74ec-4e47-b0b2-f4d3b7bb998e,Field Operations,FLDO
+f1ae56d2-ed42-41eb-8f6c-b18c37116288,IT,IT
+07fc00ec-96f9-4c4c-9bf9-b05b29b4d357,Finance,FIN
+4d963646-da47-48f8-b80c-a0555e937b2c,Technical Support,TECH
+b267248b-a0ef-4a5e-bb7f-1df348f0224f,Customer Relations,CREL
